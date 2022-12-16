@@ -1,0 +1,14 @@
+---
+- name: Distribute certificates
+  hosts: controllers
+  remote_user: ubuntu
+
+  tasks:
+    - name: Distribute certificates
+      copy:
+        src: "{{ item }}"
+        dest: ~/
+      loop:
+        - ca.pem
+        - kubernetes.pem
+        - kubernetes-key.pem

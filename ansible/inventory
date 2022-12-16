@@ -1,0 +1,8 @@
+[controllers]
+controller-0    ansible_host=54.174.98.241        
+controller-1    ansible_host=3.80.51.122
+
+[controllers:vars]
+ansible_connection=ssh
+ansible_user=ubuntu
+ansible_ssh_private_key_file=./kthw.pem

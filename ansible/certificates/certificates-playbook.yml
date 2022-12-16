@@ -1,0 +1,25 @@
+---
+- name: Generate certificates
+  hosts: localhost
+  connection: local 
+  
+  vars:
+    controller_private_ip_1: 10.0.101.87
+    controller_hostname_1: ip-10-0-101-87.ec2.internal
+    
+    controller_private_ip_2: 10.0.102.236
+    controller_hostname_2: ip-10-0-102-236.ec2.internal
+  
+  tasks:
+  - name: Provisioning the CA
+    ansible.builtin.shell: cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+
+  - name: Generate kubernetes.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -hostname=10.32.0.1,{{ controller_private_ip_1 }},{{ controller_hostname_1 }},{{ controller_private_ip_2 }},{{ controller_hostname_2 }},127.0.0.1,localhost,kubernetes.default \
+        -profile=kubernetes \
+        kubernetes-csr.json | cfssljson -bare kubernetes

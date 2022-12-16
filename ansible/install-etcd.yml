@@ -1,0 +1,74 @@
+---
+- name: Distribute certificates
+  hosts: controllers
+  remote_user: ubuntu
+  become: yes
+  
+  vars:
+    INITIAL_CLUSTER: ip-10-0-101-87=https://10.0.101.87:2380,ip-10-0-102-236=https://10.0.102.236:2380
+
+  tasks:
+  - name: Download etcd
+    ansible.builtin.get_url:
+      url: https://github.com/coreos/etcd/releases/download/v3.3.5/etcd-v3.3.5-linux-amd64.tar.gz
+      dest: /opt/etcd-v3.3.5-linux-amd64.tar.gz
+
+  - name: Extract .tar.gz
+    ansible.builtin.unarchive:
+      src: /opt/etcd-v3.3.5-linux-amd64.tar.gz
+      dest: /opt/
+      remote_src: yes
+
+  - name: Copy etcd binary into /usr/local/bin
+    copy:
+      src: "/opt/etcd-v3.3.5-linux-amd64/{{ item }}"
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: "0744"
+    loop:
+      - "etcd"
+      - "etcdctl"
+
+  - name: Create directories
+    ansible.builtin.file:
+      path: "{{ item }}"
+      state: directory
+    loop:
+      - /etc/etcd
+      - /var/lib/etcd
+
+  - name: Copy certificates
+    copy:
+      src: "{{ item }}"
+      dest: /etc/etcd
+      remote_src: yes
+    loop:
+      - ca.pem
+      - kubernetes.pem
+      - kubernetes-key.pem
+
+  - name: Get hostname
+    command: hostname -s
+    register: hostname_command
+  
+  - set_fact:
+      ETCD_NAME: "{{ hostname_command.stdout }}"
+
+  - name: Get internal ip address
+    command: curl http://169.254.169.254/latest/meta-data/local-ipv4
+    register: internal_ip_command
+
+  - set_fact:
+      INTERNAL_IP: "{{ internal_ip_command.stdout }}"
+
+  - name: Copy etcd service file
+    ansible.builtin.template:
+      src: etcd.service.tpl
+      dest: /etc/systemd/system/etcd.service
+
+  - name: Start and enable etcd service 
+    ansible.builtin.systemd:
+      name: etcd
+      enabled: yes
+      state: started
+      daemon_reload: yes
