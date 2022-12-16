@@ -1,6 +1,6 @@
 [controllers]
-controller-0    ansible_host=54.174.98.241        
-controller-1    ansible_host=3.80.51.122
+controller-0    ansible_host=54.174.98.241    private_ip=10.0.101.87    private_dns=ip-10-0-101-87
+controller-1    ansible_host=3.80.51.122      private_ip=10.0.102.236   private_dns=ip-10-0-102-236
 
 [controllers:vars]
 ansible_connection=ssh

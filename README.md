@@ -18,5 +18,5 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 
 ansible-playbook -i inventory certificates/distribute-certificates-playbook.yml
 
-ansible-playbook -i inventory install-etcd.yml
+ansible-playbook -i inventory controllers.yml
 ```

@@ -1,0 +1,8 @@
+---
+- name: Distribute certificates
+  hosts: controllers
+  remote_user: ubuntu
+  become: yes
+
+  roles:
+    - role: 'etcd'
