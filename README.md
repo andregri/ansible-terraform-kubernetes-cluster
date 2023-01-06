@@ -1,5 +1,6 @@
 # IaC
-
+1. Create a Key Pair named `kthw` on AWS and copy it into `ansible` folder
+2. Run terraform
 ```bash
 cd iac
 source ./env
