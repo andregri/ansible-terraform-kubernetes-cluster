@@ -1,26 +1,22 @@
-module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-
-  name = "my-vpc"
-  cidr = "10.0.0.0/16"
-
-  azs             = ["us-east-1a", "us-east-1b", "us-east-1c"]
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.101.0/24", "10.0.102.0/24", "10.0.103.0/24"]
-
-  enable_nat_gateway = true
-  enable_vpn_gateway = true
-
+resource "aws_default_vpc" "default" {
   tags = {
-    Terraform = "true"
-    Environment = "dev"
+    Name = "Default VPC"
   }
+}
+
+locals {
+  azs = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}
+
+resource "aws_default_subnet" "default" {
+  count = length(local.azs)
+  availability_zone = local.azs[count.index]
 }
 
 resource "aws_security_group" "allow_ssh" {
   name        = "allow_ssh"
   description = "Allow ssh traffic"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = aws_default_vpc.default.id
 
   ingress {
     description      = "SSH"

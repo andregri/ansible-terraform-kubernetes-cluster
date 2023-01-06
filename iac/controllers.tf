@@ -11,7 +11,7 @@ module "ec2_instance" {
   key_name               = "kthw"
   monitoring             = true
   vpc_security_group_ids = [aws_security_group.allow_etcd.id, aws_security_group.allow_ssh.id]
-  subnet_id              = module.vpc.public_subnets[count.index]
+  subnet_id              = aws_default_subnet.default[count.index].id
 
   associate_public_ip_address = true
 
@@ -24,14 +24,14 @@ module "ec2_instance" {
 resource "aws_security_group" "allow_etcd" {
   name        = "allow_etcd"
   description = "Allow etcd traffic on port 2379 and 2380"
-  vpc_id      = module.vpc.vpc_id
+  vpc_id      = aws_default_vpc.default.id
 
   ingress {
     description      = "Port 2379"
     from_port        = 2379
     to_port          = 2380
     protocol         = "tcp"
-    cidr_blocks      = module.vpc.public_subnets_cidr_blocks
+    cidr_blocks      = aws_default_subnet.default.*.cidr_block
   }
 
   egress {
