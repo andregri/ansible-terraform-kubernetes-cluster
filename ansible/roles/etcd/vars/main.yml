@@ -1,2 +1,2 @@
 ---
-INITIAL_CLUSTER: "{{ hostvars['controller-0'].private_dns }}=https://{{ hostvars['controller-0'].private_ip }},{{ hostvars['controller-1'].private_dns }}=https://{{ hostvars['controller-1'].private_ip }}"
+INITIAL_CLUSTER: "{{ hostvars['controller-0'].private_dns }}=https://{{ hostvars['controller-0'].private_ip }}:2380,{{ hostvars['controller-1'].private_dns }}=https://{{ hostvars['controller-1'].private_ip }}:2380"

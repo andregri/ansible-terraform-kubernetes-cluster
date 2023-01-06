@@ -42,7 +42,7 @@
   register: hostname_command
 
 - set_fact:
-    ETCD_NAME: "{{ hostname_command.stdout }}"
+    ETCD_NAME: "{{ hostname_command.stdout }}.ec2.internal"
 
 - name: Get internal ip address
   command: curl http://169.254.169.254/latest/meta-data/local-ipv4
