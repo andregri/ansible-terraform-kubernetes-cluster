@@ -4,11 +4,17 @@
   connection: local 
   
   vars:
-    controller_private_ip_1: 10.0.101.87
-    controller_hostname_1: ip-10-0-101-87.ec2.internal
+    controller_private_ip_1: 172.31.26.82
+    controller_hostname_1: ip-172-31-26-82.ec2.internal
     
-    controller_private_ip_2: 10.0.102.236
-    controller_hostname_2: ip-10-0-102-236.ec2.internal
+    controller_private_ip_2: 172.31.40.215
+    controller_hostname_2: ip-172-31-40-215.ec2.internal
+
+    worker_private_ip_0: 1.1.1.0
+    worker_hostname_0: worker0
+
+    worker_private_ip_1: 1.1.1.1
+    worker_hostname_1: worker1
   
   tasks:
   - name: Provisioning the CA
@@ -23,3 +29,78 @@
         -hostname=10.32.0.1,{{ controller_private_ip_1 }},{{ controller_hostname_1 }},{{ controller_private_ip_2 }},{{ controller_hostname_2 }},127.0.0.1,localhost,kubernetes.default \
         -profile=kubernetes \
         kubernetes-csr.json | cfssljson -bare kubernetes
+
+  - name: Generate admin.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes \
+        admin-csr.json | cfssljson -bare admin
+
+  - name: Templating csr for worker 0
+    ansible.builtin.template:
+      src: worker0-csr.json.j2
+      dest: "{{ worker_hostname_0 }}-csr.json"
+
+  - name: Generate certificates for worker0
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -hostname={{ worker_private_ip_0 }},{{ worker_hostname_0 }} \
+        -profile=kubernetes \
+        {{ worker_hostname_0 }}-csr.json | cfssljson -bare {{ worker_hostname_0 }}
+
+  - name: Templating csr for worker 1
+    ansible.builtin.template:
+      src: worker1-csr.json.j2
+      dest: "{{ worker_hostname_1 }}-csr.json"
+
+  - name: Generate certificates for worker1
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -hostname={{ worker_private_ip_1 }},{{ worker_hostname_1 }} \
+        -profile=kubernetes \
+        {{ worker_hostname_1 }}-csr.json | cfssljson -bare {{ worker_hostname_1 }}
+
+  - name: Generate kube-controller-manager.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes \
+        kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+
+  - name: Generate kube-proxy.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes \
+        kube-proxy-csr.json | cfssljson -bare kube-proxy
+
+  - name: Generate kube-scheduler.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes \
+        kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+
+  - name: Generate kube-scheduler.pem
+    ansible.builtin.shell: |
+      cfssl gencert \
+        -ca=ca.pem \
+        -ca-key=ca-key.pem \
+        -config=ca-config.json \
+        -profile=kubernetes \
+        service-account-csr.json | cfssljson -bare service-account
