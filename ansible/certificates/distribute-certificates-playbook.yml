@@ -10,5 +10,24 @@
         dest: ~/
       loop:
         - ca.pem
+        - ca-key.pem
         - kubernetes.pem
         - kubernetes-key.pem
+        - service-account.pem
+        - service-account-key.pem
+
+- name: Distribute certificates to workers
+  hosts: workers
+  remote_user: ubuntu
+
+  tasks:
+    - name: Distribute certificates
+      copy:
+        src: "{{ item }}"
+        dest: ~/
+      loop:
+        - ca.pem
+        - "{{ hostvars['worker-0'].private_dns }}.pem"
+        - "{{ hostvars['worker-0'].private_dns }}-key.pem"
+        - "{{ hostvars['worker-1'].private_dns }}.pem"
+        - "{{ hostvars['worker-1'].private_dns }}-key.pem"

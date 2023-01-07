@@ -18,6 +18,7 @@ module "ec2_instance" {
   tags = {
     Terraform   = "true"
     Project     = "kubernetes-the-hard-way"
+    Type        = "controllers"
   }
 }
 

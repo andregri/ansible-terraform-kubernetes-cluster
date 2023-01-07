@@ -1,3 +1,4 @@
 *.pem
 *.csr
 worker*-csr.json
+*.internal-csr.json
