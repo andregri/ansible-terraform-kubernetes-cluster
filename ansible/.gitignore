@@ -1,3 +1,4 @@
+inventory
 *.pem
 *.csr
 worker*-csr.json
